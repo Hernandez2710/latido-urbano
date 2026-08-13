@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latido Urbano - Sistema de Registros</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:#0f172a;
+    color:white;
+    padding:20px;
+}
+
+header{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+header h1{
+    color:#38bdf8;
+    font-size:2.5rem;
+}
+
+header p{
+    color:#cbd5e1;
+}
+
+.container{
+    max-width:1300px;
+    margin:auto;
+}
+
+.formulario{
+    background:#1e293b;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:25px;
+}
+
+.formulario h2{
+    margin-bottom:15px;
+    color:#38bdf8;
+}
+
+input, select{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    background:#334155;
+    color:white;
+}
+
+input::placeholder{
+    color:#cbd5e1;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:8px;
+    background:#38bdf8;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.seccion{
+    margin-top:30px;
+}
+
+.seccion h2{
+    margin-bottom:10px;
+    color:#38bdf8;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#1e293b;
+    overflow:hidden;
+}
+
+th{
+    background:#38bdf8;
+    color:black;
+}
+
+th,td{
+    padding:12px;
+    text-align:center;
+    border:1px solid #334155;
+}
+
+tr:hover{
+    background:#293548;
+}
+
+.eliminar{
+    background:#ef4444;
+    color:white;
+    width:auto;
+    padding:8px 15px;
+}
+
+#reparacionCampos{
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>🚖 LATIDO URBANO</h1>
+    <p>Sistema de Registro de Actividades y Reparaciones</p>
+</header>
+
+<div class="container">
+
+    <div class="formulario">
+        <h2>Nuevo Registro</h2>
+
+        <input type="text" id="empleado" placeholder="Nombre del empleado">
+
+        <select id="tipo">
+            <option value="Actividad">Actividad</option>
+            <option value="Reparación">Reparación</option>
+        </select>
+
+        <div id="actividadCampos">
+            <input type="text" id="tipoActividad" placeholder="Tipo de actividad">
+        </div>
+
+        <div id="reparacionCampos">
+            <input type="text" id="vehiculo" placeholder="Vehículo traído">
+            <input type="number" id="cantidadGastada" placeholder="Cantidad gastada">
+        </div>
+
+        <button onclick="agregarRegistro()">Agregar Registro</button>
+    </div>
+
+    <div class="seccion">
+        <h2>📋 Registro de Actividades</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Empleado</th>
+                    <th>Tipo de Actividad</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tablaActividades"></tbody>
+        </table>
+    </div>
+
+    <div class="seccion">
+        <h2>🔧 Registro de Reparaciones</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Empleado</th>
+                    <th>Vehículo Traído</th>
+                    <th>Cantidad Gastada</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tablaReparaciones"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+
+let registros = JSON.parse(localStorage.getItem("registros")) || [];
+
+mostrarRegistros();
+
+document.getElementById("tipo").addEventListener("change", function(){
+
+    if(this.value === "Actividad"){
+        document.getElementById("actividadCampos").style.display = "block";
+        document.getElementById("reparacionCampos").style.display = "none";
+    }else{
+        document.getElementById("actividadCampos").style.display = "none";
+        document.getElementById("reparacionCampos").style.display = "block";
+    }
+
+});
+
+function agregarRegistro(){
+
+    let empleado = document.getElementById("empleado").value.trim();
+    let tipo = document.getElementById("tipo").value;
+
+    if(empleado === ""){
+        alert("Ingresa el nombre del empleado.");
+        return;
+    }
+
+    let fecha = new Date().toLocaleString();
+
+    if(tipo === "Actividad"){
+
+        let actividad = document.getElementById("tipoActividad").value.trim();
+
+        if(actividad === ""){
+            alert("Ingresa el tipo de actividad.");
+            return;
+        }
+
+        registros.push({
+            fecha,
+            empleado,
+            tipo,
+            actividad
+        });
+
+        document.getElementById("tipoActividad").value = "";
+
+    }else{
+
+        let vehiculo = document.getElementById("vehiculo").value.trim();
+        let cantidad = document.getElementById("cantidadGastada").value.trim();
+
+        if(vehiculo === "" || cantidad === ""){
+            alert("Completa todos los datos.");
+            return;
+        }
+
+        registros.push({
+            fecha,
+            empleado,
+            tipo,
+            vehiculo,
+            cantidad
+        });
+
+        document.getElementById("vehiculo").value = "";
+        document.getElementById("cantidadGastada").value = "";
+    }
+
+    document.getElementById("empleado").value = "";
+
+    localStorage.setItem(
+        "registros",
+        JSON.stringify(registros)
+    );
+
+    mostrarRegistros();
+}
+
+function mostrarRegistros(){
+
+    let tablaActividades =
+        document.getElementById("tablaActividades");
+
+    let tablaReparaciones =
+        document.getElementById("tablaReparaciones");
+
+    tablaActividades.innerHTML = "";
+    tablaReparaciones.innerHTML = "";
+
+    registros.forEach((registro,index)=>{
+
+        if(registro.tipo === "Actividad"){
+
+            tablaActividades.innerHTML += `
+            <tr>
+                <td>${registro.fecha}</td>
+                <td>${registro.empleado}</td>
+                <td>${registro.actividad}</td>
+                <td>
+                    <button class="eliminar"
+                    onclick="eliminarRegistro(${index})">
+                    Eliminar
+                    </button>
+                </td>
+            </tr>
+            `;
+
+        }else{
+
+            tablaReparaciones.innerHTML += `
+            <tr>
+                <td>${registro.fecha}</td>
+                <td>${registro.empleado}</td>
+                <td>${registro.vehiculo}</td>
+                <td>$${registro.cantidad}</td>
+                <td>
+                    <button class="eliminar"
+                    onclick="eliminarRegistro(${index})">
+                    Eliminar
+                    </button>
+                </td>
+            </tr>
+            `;
+        }
+
+    });
+
+}
+
+function eliminarRegistro(index){
+
+    if(confirm("¿Deseas eliminar este registro?")){
+
+        registros.splice(index,1);
+
+        localStorage.setItem(
+            "registros",
+            JSON.stringify(registros)
+        );
+
+        mostrarRegistros();
+    }
+
+}
+
+</script>
+
+</body>
+</html>
